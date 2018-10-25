@@ -50,9 +50,11 @@ var ba = new botauth.BotAuthenticator(server, bot, { baseUrl: `https://${WEBSITE
 ba.provider("dropbox", (options) => {
     console.log(options);
     return new DropboxOAuth2Strategy({
+        apiVersion: '2',
         clientID : DROPBOX_APP_ID,
         clientSecret : DROPBOX_APP_SECRET,
-        callbackURL : options.callbackURL
+        //callbackURL : options.callbackURL
+        callbackURL : `https://${WEBSITE_HOSTNAME}/auth/dropbox-oauth2/callback`
     }, (accessToken, refreshToken, profile, done) => {
         profile.accessToken = accessToken;
         profile.refreshToken = refreshToken;
