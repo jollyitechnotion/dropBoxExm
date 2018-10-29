@@ -53,12 +53,13 @@ ba.provider("dropbox", (options) => {
         apiVersion: '2',
         clientID : DROPBOX_APP_ID,
         clientSecret : DROPBOX_APP_SECRET,
-        //callbackURL : options.callbackURL
-        callbackURL : `https://${WEBSITE_HOSTNAME}/auth/dropbox-oauth2/callback`
+        callbackURL : options.callbackURL
+        //callbackURL : `http://${WEBSITE_HOSTNAME}/botauth/dropbox/callback`
     }, (accessToken, refreshToken, profile, done) => {
+        console.log(accessToken);
         profile.accessToken = accessToken;
         profile.refreshToken = refreshToken;
-
+        console.log(profile);
         done(null, profile);
     });
 });
@@ -80,21 +81,23 @@ bot.dialog("/logout", (session) => {
     session.endDialog("logged_out");
 });
 
-bot.dialog("/upload", [].concat(
-    (session, args, skip) => {
+bot.dialog("/upload", [].concat(    
+    //(session, args, skip) => {
+    (session, args, next) => {
         //check if user is already connected or show a message
         if(!ba.profile(session, "dropbox")) {
             session.send("not_connected");
         }
-
         //save uploaded file information so we can get back to it         
         session.dialogData.attachments = session.message.attachments;
         session.save();
 
-        skip();
+        //skip();
+        next();
     },
     ba.authenticate("dropbox"),
     (session, args, skip) => {
+        console.log("here");
         let user = ba.profile(session, "dropbox");
         
         if(!(session.dialogData.attachments && session.dialogData.attachments.length > 0)) {
@@ -102,8 +105,9 @@ bot.dialog("/upload", [].concat(
         }
 
         let attachmentUrl = session.dialogData.attachments[0].contentUrl;
-
+console.log(session.dialogData.attachments);
         upload({ sourceUrl : attachmentUrl, dropboxToken : user.accessToken, path : "/" }, (err, result) => {
+            console.log(err);
             if(err) {
                 session.endDialog(`error uploading your file '${ err }'.`);
             } else {
@@ -118,3 +122,23 @@ bot.dialog("/upload", [].concat(
 server.listen(PORT, () => {
    console.log('%s listening to %s', server.name, server.url); 
 });
+
+
+// Request file with Authentication Header
+var requestWithToken = function (url) {
+    return obtainToken().then(function (token) {
+        return request({
+            url: url,
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/octet-stream'
+            }
+        });
+    });
+};
+// Promise for obtaining JWT Token (requested once)
+var obtainToken = Promise.promisify(connector.getAccessToken.bind(connector));
+
+var checkRequiresToken = function (message) {
+    return message.source === 'skype' || message.source === 'msteams';
+};
