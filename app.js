@@ -14,6 +14,9 @@ const UploadRecognizer = require("./recognizer");
 
 const DropboxOAuth2Strategy = require("passport-dropbox-oauth2").Strategy;
 
+var Promise = require('bluebird');
+var request_promise = require('request-promise').defaults({ encoding: null });
+
 //contextual service information
 const WEBSITE_HOSTNAME = envx("WEBSITE_HOSTNAME");
 const PORT = envx("PORT", 3998);
