@@ -14,8 +14,8 @@ const UploadRecognizer = require("./recognizer");
 
 const DropboxOAuth2Strategy = require("passport-dropbox-oauth2").Strategy;
 
-var Promise = require('bluebird');
-var request_promise = require('request-promise').defaults({ encoding: null });
+//var Promise = require('bluebird');
+//var request_promise = require('request-promise').defaults({ encoding: null });
 
 //contextual service information
 const WEBSITE_HOSTNAME = envx("WEBSITE_HOSTNAME");
@@ -59,10 +59,8 @@ ba.provider("dropbox", (options) => {
         callbackURL : options.callbackURL
         //callbackURL : `http://${WEBSITE_HOSTNAME}/botauth/dropbox/callback`
     }, (accessToken, refreshToken, profile, done) => {
-        console.log(accessToken);
         profile.accessToken = accessToken;
         profile.refreshToken = refreshToken;
-        console.log(profile);
         done(null, profile);
     });
 });
@@ -108,9 +106,8 @@ bot.dialog("/upload", [].concat(
         }
 
         let attachmentUrl = session.dialogData.attachments[0].contentUrl;
-console.log(session.dialogData.attachments);
+        console.log(session.dialogData.attachments);
         upload({ sourceUrl : attachmentUrl, dropboxToken : user.accessToken, path : "/" }, (err, result) => {
-            console.log(err);
             if(err) {
                 session.endDialog(`error uploading your file '${ err }'.`);
             } else {
@@ -118,6 +115,8 @@ console.log(session.dialogData.attachments);
             }
             
         });
+
+        
     }
 ));
 
@@ -139,9 +138,9 @@ var requestWithToken = function (url) {
         });
     });
 };
-// Promise for obtaining JWT Token (requested once)
-var obtainToken = Promise.promisify(connector.getAccessToken.bind(connector));
+// // Promise for obtaining JWT Token (requested once)
+// var obtainToken = Promise.promisify(connector.getAccessToken.bind(connector));
 
-var checkRequiresToken = function (message) {
-    return message.source === 'skype' || message.source === 'msteams';
-};
+// var checkRequiresToken = function (message) {
+//     return message.source === 'skype' || message.source === 'msteams';
+// };

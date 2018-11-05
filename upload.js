@@ -139,7 +139,7 @@ function upload(options, callback) {
         if(tokenErr) {
             callback(tokenErr, null);
         }
-
+console.log(token);
         getSourceMeta({ sourceUrl : options.sourceUrl, sourceToken : token }, (metaErr, meta) => {
             if(metaErr) {
                 return callback(metaErr);
